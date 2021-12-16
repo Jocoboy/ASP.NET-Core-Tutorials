@@ -12,5 +12,8 @@ Develop page-focused web apps with a clean separation of concerns
 
 Develop web apps using the Model-View-Controller design pattern
 
-### [Create your first ASP.NET Core MVC app](https://docs.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app/start-mvc?view=aspnetcore-6.0)
+### [Create your first ASP.NET Core MVC app](https://github.com/Jocoboy/ASP.NET-Core-Tutorials/tree/master/MVC-web-app)
 
+## HTTP API apps
+
+### [Create a web API with ASP.NET Core Controllers](https://github.com/Jocoboy/ASP.NET-Core-Tutorials/tree/master/Create-a-web-API)
