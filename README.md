@@ -17,3 +17,5 @@ Develop web apps using the Model-View-Controller design pattern
 ## HTTP API apps
 
 ### [Create a web API with ASP.NET Core Controllers](https://github.com/Jocoboy/ASP.NET-Core-Tutorials/tree/master/Create-a-web-API)
+
+### [Persist and retrieve relational data with Entity Framework Core](https://github.com/Jocoboy/ASP.NET-Core-Tutorials/tree/master/Persist-data-with-EFCore)
