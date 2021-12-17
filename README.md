@@ -16,6 +16,15 @@ Develop web apps using the Model-View-Controller design pattern
 
 ## HTTP API apps
 
+Develop HTTP services with ASP.NET Core
+
 ### [Create a web API with ASP.NET Core Controllers](https://github.com/Jocoboy/ASP.NET-Core-Tutorials/tree/master/Create-a-web-API)
 
 ### [Persist and retrieve relational data with Entity Framework Core](https://github.com/Jocoboy/ASP.NET-Core-Tutorials/tree/master/Persist-data-with-EFCore)
+
+## Interactive client-side Blazor apps
+
+Develop with reusable UI components that can take advantage of WebAssembly for near-native performance
+
+### [Build a web app with Blazor](https://github.com/Jocoboy/ASP.NET-Core-Tutorials/tree/master/Blazor-web-app)
+
