@@ -3,6 +3,7 @@ using BlazingPizza;
 
 public class OrderState
 {
+       
     public bool showingConfigureDialog { get; private set; }
 
     public Pizza configuringPizza { get; private set; }
