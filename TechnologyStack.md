@@ -105,3 +105,15 @@
 2）主函数获得控制权后继续执行方法体内步骤2和步骤3，GetResultAsync方法则异步执行。
 
 3）当主函数执行步骤3时，由于步骤3需要打印异步方法的返回结果，故需要等待异步方法结束才能继续。所以需先执行步骤5，然后再继续执行步骤3。
+
+# ASP.NET
+
+## Blazor WebAssembly应用程序中的HttpClient 
+
+Blazor WebAssembly 应用程序使用预配置的 HttpClient 服务调用 **Web API**。这个预配置的 **HttpClient** 是使用浏览器 Fetch API 实现的，有一些限制。 HttpClient 还可以使用 Blazor JSON 帮助程序或 **HttpRequestMessage** 对象进行 API 调用。默认情况下，API 调用请求只能向同一源服务器发出，但您可以调用其他服务器上可用的第三方 API，如果它们支持跨源资源共享 (CORS)。
+**System.Net.Http.Json** 命名空间为 HttpClient 提供了使用 **System.Text.Json** 执行自动序列化和反序列化的扩展方法。这些扩展方法将请求发送到 Web API URI 并相应地处理响应。
+常用的方法有：
+
+> - GetFromJsonAsync：发送HTTP GET请求，解析JSON响应体创建对象。
+> - PostAsJsonAsync：向包含序列化为JSON 的值的指定 URI 发送 POST 请求 在请求正文中。
+> - PutAsJsonAsync：发送 HTTP PUT 请求，包括JSON 编码的内容。
