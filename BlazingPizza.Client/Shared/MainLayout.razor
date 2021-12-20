@@ -2,7 +2,7 @@
 
 <div class="top-bar">
 
-     <a class="logo" href="">
+    <a class="logo" href="">
         <img src="img/logo.svg" />
     </a>
 
@@ -10,10 +10,15 @@
         <img src="img/pizza-slice.svg" />
         <div>Get Pizza</div>
     </NavLink>
-    <NavLink  href="myorders" class="nav-tab">
-        <img src="img/bike.svg" />
-        <div>My Orders</div>
-    </NavLink >
+    <AuthorizeView>
+        <NavLink href="myorders" class="nav-tab">
+            <img src="img/bike.svg" />
+            <div>My Orders</div>
+        </NavLink>
+
+    </AuthorizeView>
+
+    <LoginDisplay />
 </div>
 
 

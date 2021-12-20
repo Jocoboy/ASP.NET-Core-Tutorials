@@ -44,4 +44,8 @@ public class OrderState
     public void ResetOrder(){
         order = new Order();
     }
+
+    public void ReplaceOrder(Order __order){
+        order = __order;
+    }
 }
