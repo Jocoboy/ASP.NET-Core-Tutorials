@@ -75,8 +75,7 @@
 
 }
 
-@if (OrderState.showingConfigureDialog)
-{
+<TemplatedDialog Show="OrderState.showingConfigureDialog">
     <ConfigurePizzaDialog pizza="OrderState.configuringPizza" OnCancel="OrderState.CancelConfigurePizzaDialog"
     OnConfirm="OrderState.ConfirmConfigurePizzaDialog"></ConfigurePizzaDialog>
-}
+</TemplatedDialog>
