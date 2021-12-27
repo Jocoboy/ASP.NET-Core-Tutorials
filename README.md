@@ -277,6 +277,58 @@ PM> Install-Package Swashbuckle.AspNetCore
           });
 ```
 
+# 依赖注入（DI)
+
+## 服务生命周期
+
+### AddSingleton
+
+> 创建一个Singleton服务，首次请求会创建服务，然后，所有后续的请求中都会使用相同的实例，整个应用程序生命周期都使用该单个实例
+
+实例 - [基于IHttpContextAccessor实现系统级别身份标识](https://www.cnblogs.com/lex-wu/p/10528109.html)REST APIs文档生成工具
+
+```c#
+services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+```
+
+### AddScoped
+
+> 不同http清求，实例不同，同名谓词不同，也不行。例如httpget跟httppost,作用域是一定范围内，例如从同一个post请求的create方法，只能统计一次，每次请求都是新的实例
+
+### AddTransient
+
+> 临时服务，每次请求时，都会创建一个新的Transient服务实例
+
+## 批量注入
+
+### DIRegisterService
+
+```c#
+        /// <summary>
+        /// 依赖注入仓储与服务
+        /// </summary>
+        /// <param name="service"></param>
+        /// <returns></returns>
+        public static IServiceCollection DIRegisterService(this IServiceCollection service)
+```
+
+### RegisterAssembly
+
+```c#
+        /// <summary>
+        /// 用DI批量注入接口程序集中对应的实现类。
+        /// <para>
+        /// 需要注意的是，这里有如下约定：
+        /// IUserService --> UserService, IUserRepository --> UserRepository.
+        /// </para>
+        /// </summary>
+        /// <param name="service"></param>
+        /// <param name="AssemblyName">实现程序集的名称（不包含文件扩展名）</param>
+        /// <param name="serviceLifetime">生命周期</param>
+        /// <returns></returns>
+        public static IServiceCollection RegisterAssembly(this IServiceCollection service,string AssemblyName, ServiceLifetime serviceLifetime = ServiceLifetime.Scoped)
+```
+
 # 自定义WebApi模型验证
 
 ## 应用场景
@@ -314,6 +366,117 @@ InvalidModelStateResponseFactory是一个参数为ActionContext，返回值为IA
 
 
 上面的代码是覆盖ModelState管理的默认行为（ApiBehaviorOptions），当数据模型验证失败时，程序会执行这段代码。没通过验证的ModelState，把它抛出的错误信息通过MessageDTO打包返回给客户端。
+
+# 自定义Tool类
+
+## 验证码相关
+
+### 生成验证码
+
+#### RndomStr（手机六位验证码）
+
+```c#
+        /// <summary>  
+        /// 生成指定长度的随机字符串 
+        /// </summary>  
+        /// <param name="codeLength">字符串的长度</param>  
+        /// <returns>返回随机数字符串</returns>  
+        public static string RndomStr(int codeLength)
+```
+
+#### CreateValiCode（图片四位验证码）
+
+```c#
+        /// <summary>  
+        /// 将生成的字符串写入图像文件
+        /// </summary>  
+        /// <param name="code">验证码字符串</param>
+        /// <param name="length">生成位数（默认4位）</param>  
+
+        public static MemoryStream CreateValiCode(out string code, int length = 4)
+```
+
+### 校验验证码
+
+#### GetCacheValue
+
+```c#
+        /// <summary>
+        /// 获取缓存值
+        /// </summary>
+        /// <param name="key">缓存的键</param>
+        /// <returns>返回缓存的值</returns>
+        public static object GetCacheValue(string key, IMemoryCache cache)
+```
+
+
+
+#### ValiCode
+
+```c#
+    	/// <summary>
+        /// 校验验证码是否正确
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        public static bool ValiCode(string key, string code, IMemoryCache cache)
+```
+
+## 短信相关
+
+### 发送短信
+
+#### HttpPost
+
+```c#
+       	/// <summary>  
+        /// POST请求。返回值： 1，成功。0，失败。1001，连接接口失败。1002，获取接口返回信息失败。
+        /// </summary>  
+        public static string HttpPost(string Url, string postDataStr)
+```
+
+#### SMSMessage
+
+```c#
+        /// <summary>
+        /// 发送短信
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="dto"></param>
+        public static void SMSMessage(string url, RegMessageDTO<SmsDataDTO> dto)
+```
+
+### 重新发送短信
+
+#### GetSmsArrState
+
+```c#
+        /// <summary>
+        ///重新发送短信
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="dto"></param>
+        public static SMSReport GetSmsArrState(string url, string clientId, List<SMSInfo> info)
+```
+
+## 安全性
+
+### MD5字符串加密
+
+#### GenerateMD5
+
+```c#
+        /// <summary>
+        /// MD5字符串加密
+        /// </summary>
+        /// <param name="txt"></param>
+        /// <returns>加密后字符串</returns>
+        public static string GenerateMD5(string txt)
+```
+
+
+
 
 # Filter
 
@@ -424,27 +587,8 @@ public class QSystemController : Controller
 
 
 
-# 服务
 
-## 创建服务
 
-### AddSingleton
-
-> 创建一个Singleton服务，首次请求会创建服务，然后，所有后续的请求中都会使用相同的实例，整个应用程序生命周期都使用该单个实例
-
-实例 - [基于IHttpContextAccessor实现系统级别身份标识](https://www.cnblogs.com/lex-wu/p/10528109.html)REST APIs文档生成工具
-
-```c#
-services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-```
-
-### AddScoped
-
-> 不同http清求，实例不同，同名谓词不同，也不行。例如httpget跟httppost,作用域是一定范围内，例如从同一个post请求的create方法，只能统计一次，每次请求都是新的实例
-
-### AddTransient
-
-> 临时服务，每次请求时，都会创建一个新的Transient服务实例
 
 # 从3.1迁移到6.0
 
@@ -566,6 +710,110 @@ app.Run();
 
 
 # 参考
+
+## MemoryCacheHelper
+
+### 基本方法(CRUD)
+
+#### Set\<T>
+
+```c#
+        /// <summary>
+        /// 设置缓存
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <param name="expire">过期时间，默认5分钟</param>
+        public static void Set<T>(string key, T value, int expire = 5)
+```
+
+#### T Get\<T>
+
+```c#
+        /// <summary>
+        /// 获取缓存
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static T Get<T>(string key)
+```
+
+
+#### Remove(string)
+
+```c#
+        /// <summary>
+        /// 移除缓存
+        /// </summary>
+        /// <param name="key"></param>
+        public static void Remove(string key)
+```
+
+#### Exists
+
+```c#
+        /// <summary>
+        /// 是否存在缓存
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static bool Exists(string key)
+```
+
+#### GetCacheKeys
+
+```c#
+        /// <summary>
+        /// 获取所有缓存键
+        /// </summary>
+        /// <returns></returns>
+        public static List<string> GetCacheKeys()
+```
+
+#### ClearCache
+
+```c#
+        /// <summary>
+        /// 移除所有缓存
+        /// </summary>
+        public static void ClearCache()
+```
+
+
+
+### 扩展方法
+
+#### T GetOrSet\<T> 
+
+Set\<T> ，T Get\<T>组合方法
+
+```c#
+        /// <summary>
+        /// 获取或设置缓存
+        /// </summary>
+        /// <typeparam name="T">缓存类型</typeparam>
+        /// <param name="cacheKey">缓存Key</param>
+        /// <param name="getValue">获取要设置的缓存值的Lambda表达式</param>
+        /// <param name="expire">过期时间，默认5分钟</param>
+        /// <returns></returns>
+        public static T GetOrSet<T>(string cacheKey, Func<T> getValue, int expire = 5)
+```
+
+#### Remove(string[])
+
+Exists，Remove组合方法
+
+```c#
+        /// <summary>
+        /// 移除缓存
+        /// </summary>
+        /// <param name="keys"></param>
+        public static void Remove(params string[] keys)
+```
+
+
 
 ## ASP.NET Core API
 
