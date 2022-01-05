@@ -886,3 +886,238 @@ dotnet new <TEMPLATE> [--dry-run] [--force] [-lang|--language {"C#"|"F#"|VB}]
 
 dotnet new -h|--help
 ```
+
+## Transact-SQL for SQL Server
+
+> Transact-SQL又简称T-SQL，它是微软公司在SQL Server数据库管理系统中对标准SQL的实现和扩展，是使用SQL Server的核心，所有与SQL Server实例通信的应用程序，其实都是通过发送T-SQL语句到服务器来完成对数据库的操作的。
+> T-SQL与标准SQL稍有不同，SQL是结构化查询语言（Structured Query Language），是目前关系型数据库管理系统中使用得最广泛的查询语言。T-SQL是在SQL上发展而来的，T-SQL在SQL的基础上添加了变量、运算符、函数、注释和流程控制等，是标准SQL语言的扩展。因此，标准SQL是几乎所有关系型数据库都支持的语言，而T-SQL是Microsoft SQL Server支持的语言。
+
+### 数据库对象的基本操作
+
+#### Create
+
+##### 创建数据库
+> 在单个批处理中提交多条语句时，可以用关键字 GO 分隔各语句。 
+>
+> 当批处理只包含一条语句时，GO 是可选的。
+
+```sql
+CREATE DATABASE TestData  
+GO
+```
+
+##### 创建表
+
+> 数据库引擎 可安装为区分大小写或不区分大小写。 如果 数据库引擎 区分大小写进行安装，则对象名必须始终具有相同的大小写。 例如，名为 OrderData 的表与名为 ORDERDATA 的表是不同的表。 如果 数据库引擎 按不区分大小写进行安装，则这两个表名被视为同一个表，而且该名称只能使用一次。
+
+```sql
+USE TestData  
+GO
+CREATE TABLE dbo.Products  
+   (ProductID int PRIMARY KEY NOT NULL,  
+   ProductName varchar(25) NOT NULL,  
+   Price money NULL,  
+   ProductDescription varchar(max) NULL)  
+GO
+```
+
+##### 创建视图
+
+```sql
+CREATE VIEW vw_Names  
+   AS  
+   SELECT ProductName, Price FROM Products;  
+GO
+```
+
+##### 创建存储过程
+
+```sql
+CREATE PROCEDURE pr_Names @VarPrice money  
+   AS  
+   BEGIN  
+      -- The print statement returns text to the user  
+      PRINT 'Products less than ' + CAST(@VarPrice AS varchar(10));  
+      -- A second statement starts here  
+      SELECT ProductName, Price FROM vw_Names  
+            WHERE Price < @varPrice;  
+   END  
+GO
+```
+
+
+
+
+#### Query
+
+##### 查询所有数据库
+
+```sql
+SELECT *
+FROM sys.databases;
+```
+
+
+
+##### 查询表中数据
+
+```sql
+-- The basic syntax for reading data from a single table  
+SELECT ProductID, ProductName, Price, ProductDescription  
+    FROM dbo.Products  
+GO
+
+-- Returns only two of the records in the table  
+SELECT ProductID, ProductName, Price, ProductDescription  
+    FROM dbo.Products  
+    WHERE ProductID < 60  
+GO
+
+-- Returns ProductName and the Price including a 7% tax  
+-- Provides the name CustomerPays for the calculated column  
+SELECT ProductName, Price * 1.07 AS CustomerPays  
+    FROM dbo.Products  
+GO
+```
+
+##### 查询视图
+
+```sql
+SELECT * FROM vw_Names;  
+GO
+```
+
+
+
+##### 查询存储过程
+
+```sql
+EXECUTE pr_Names 10.00;  
+GO
+```
+
+#### Insert
+
+##### 插入数据到表
+
+```sql
+-- Standard syntax 
+INSERT dbo.Products (ProductID, ProductName, Price, ProductDescription)  
+    VALUES (1, 'Clamp', 12.48, 'Workbench clamp')  
+GO
+
+-- Changing the order of the columns  
+INSERT dbo.Products (ProductName, ProductID, Price, ProductDescription)  
+    VALUES ('Screwdriver', 50, 3.17, 'Flat head')  
+GO
+
+-- Skipping the column list, but keeping the values in order  
+INSERT dbo.Products  
+    VALUES (75, 'Tire Bar', NULL, 'Tool for changing tires.')  
+GO
+
+-- Dropping the optional dbo and dropping the ProductDescription column  
+INSERT Products (ProductID, ProductName, Price)  
+    VALUES (3000, '3 mm Bracket', 0.52)  
+GO
+```
+
+#### Update
+
+##### 更新表中数据
+
+```sql
+UPDATE dbo.Products  
+    SET ProductName = 'Flat Head Screwdriver'  
+    WHERE ProductID = 50  
+GO
+```
+#### Delete
+
+##### 删除数据库
+
+```sql
+USE MASTER;  
+GO  
+DROP DATABASE TestData;  
+GO
+```
+
+##### 删除表
+
+```sql
+DROP TABLE Products;  
+GO
+```
+
+##### 删除表中所有数据
+
+```sql
+-- 使用 DELETE 语句删除 Products 表中的所有行
+DELETE FROM Products;  
+GO
+-- 使用 TRUNCATE 语句删除 Products 表中的所有行
+TRUNCATE TABLE TestData.dbo.Products;
+GO
+```
+
+##### 删除视图
+
+```sql
+DROP VIEW vw_Names;  
+GO
+```
+
+##### 删除存储过程
+
+```sql
+DROP PROC pr_Names;  
+GO
+```
+
+
+
+## 数据库对象的权限配置
+
+#### 创建和删除SQL Server实例的访问权限（LOGIN)
+
+```sql
+-- 创建
+CREATE LOGIN [DESKTOP-Q4ORSFH\Mary]  
+    FROM WINDOWS  
+    WITH DEFAULT_DATABASE = [TestData];  
+GO
+-- 删除
+DROP LOGIN [DESKTOP-Q4ORSFH\Mary];  
+GO
+```
+
+#### 创建和删除数据库访问权限（USER)
+
+```sql
+USE [TestData];  
+GO  
+-- 创建
+CREATE USER [Mary] FOR LOGIN [DESKTOP-Q4ORSFH\Mary];  
+GO
+-- 删除
+DROP USER Mary;  
+GO
+```
+
+#### 使用GRANT授予权限
+
+> 必须具有 EXECUTE 权限才能执行存储过程。 必须具有 SELECT、INSERT、UPDATE 和 DELETE 权限才能访问和更改数据。
+
+```sql
+GRANT EXECUTE ON pr_Names TO Mary;  
+GO
+```
+
+#### 使用REVOKE撤销权限
+
+```sql
+REVOKE EXECUTE ON pr_Names FROM Mary;  
+GO
+```
+
