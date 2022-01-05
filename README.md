@@ -911,14 +911,36 @@ GO
 > 数据库引擎 可安装为区分大小写或不区分大小写。 如果 数据库引擎 区分大小写进行安装，则对象名必须始终具有相同的大小写。 例如，名为 OrderData 的表与名为 ORDERDATA 的表是不同的表。 如果 数据库引擎 按不区分大小写进行安装，则这两个表名被视为同一个表，而且该名称只能使用一次。
 
 ```sql
+-- 在新表中创建外键
 USE TestData  
 GO
 CREATE TABLE dbo.Products  
    (ProductID int PRIMARY KEY NOT NULL,  
    ProductName varchar(25) NOT NULL,  
    Price money NULL,  
-   ProductDescription varchar(max) NULL)  
+   ProductDescription varchar(max) NULL,
+   AddressID int NULL,
+   CONSTRAINT FK_Products_Address FOREIGN KEY (AddressID)
+      REFERENCES dbo.Address (AddressID))  
 GO
+
+-- 在现有表中创建外键
+USE TestData  
+GO
+CREATE TABLE dbo.Products  
+   (ProductID int PRIMARY KEY NOT NULL,  
+   ProductName varchar(25) NOT NULL,  
+   Price money NULL,  
+   ProductDescription varchar(max) NULL,
+   AddressID int NULL)  
+GO
+
+ALTER TABLE dbo.Products 
+   ADD CONSTRAINT FK_Products_Address FOREIGN KEY (AddressID)
+      REFERENCES dbo.Address (AddressID)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE
+;
 ```
 
 ##### 创建视图
@@ -1119,5 +1141,78 @@ GO
 ```sql
 REVOKE EXECUTE ON pr_Names FROM Mary;  
 GO
+```
+
+## 事务
+
+> 事务是单个工作单元。 如果某一事务成功，则在该事务中进行的所有数据修改均会提交，成为数据库中的永久组成部分。 如果事务遇到错误且必须取消或回滚，则所有数据修改均被清除。
+>
+> SQL Server 以下列事务模式运行：
+>
+> 自动提交事务
+> 每条单独的语句都是一个事务。
+>
+> 显式事务
+> 每个事务均以 BEGIN TRANSACTION 语句显式开始，以 COMMIT 或 ROLLBACK 语句显式结束。
+>
+> 隐式事务
+> 在前一个事务完成时新事务隐式启动，但每个事务仍以 COMMIT 或 ROLLBACK 语句显式完成。
+>
+> 批处理级事务
+> 只能应用于多个活动结果集 (MARS)，在 MARS 会话中启动的 Transact-SQL 显式或隐式事务变为批处理级事务。 当批处理完成时没有提交或回滚的批处理级事务自动由 SQL Server 进行回滚。
+
+### 使用显示事务
+
+标记一个显式本地事务的起始点。 显式事务以 BEGIN TRANSACTION 语句开始，并以 COMMIT 或 ROLLBACK 语句结束。
+
+```sql
+-- 以COMMIT结束
+BEGIN TRANSACTION;  
+DELETE FROM dbo.Products 
+    WHERE ProductID = 1;  
+COMMIT;
+
+-- 以ROLLBACK结束
+CREATE TABLE ValueTable (id INT);  
+BEGIN TRANSACTION;  
+       INSERT INTO ValueTable VALUES(1);  
+       INSERT INTO ValueTable VALUES(2);  
+ROLLBACK;
+```
+
+### 事务结束标记
+
+#### COMMIT TRANSACTION
+
+标志一个成功的隐性事务或显式事务的结束。 如果 @@TRANCOUNT 为 1，COMMIT TRANSACTION 会使自事务开始以来的所有数据修改都成为数据库的永久部分，释放事务的资源，并将 @@TRANCOUNT 减少到 0。 如果 @@TRANCOUNT 大于 1，则 COMMIT TRANSACTION 使 @@TRANCOUNT 按 1 递减并且事务将保持活动状态。
+
+```sql
+BEGIN TRANSACTION;  
+DELETE FROM dbo.Products 
+    WHERE ProductID = 1;  
+COMMIT TRANSACTION;   
+```
+
+#### ROLLBACK TRANSACTION
+
+将显式事务或隐性事务回滚到事务的起点或事务内的某个保存点。 可以使用 ROLLBACK TRANSACTION 清除自事务的起点或到某个保存点所做的所有数据修改。 它还释放由事务控制的资源。
+
+```sql
+USE TestData;  
+GO  
+CREATE TABLE ValueTable ([value] INT);  
+GO  
+  
+DECLARE @TransactionName VARCHAR(20) = 'Transaction1';  
+  
+BEGIN TRAN @TransactionName  
+       INSERT INTO ValueTable VALUES(1), (2);  
+ROLLBACK TRAN @TransactionName;  
+  
+INSERT INTO ValueTable VALUES(3),(4);  
+  
+SELECT [value] FROM ValueTable;  
+  
+DROP TABLE ValueTable;
 ```
 
